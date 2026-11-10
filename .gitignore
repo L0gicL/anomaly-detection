@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# Dataset (MVTec AD license forbids redistribution)
+data/
+*.tar.xz
+
+# Training outputs, logs and weights
+results/*
+!results/.gitkeep
+models/*
+!models/.gitkeep
+lightning_logs/
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.bin
+*.xml
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
