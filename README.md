@@ -40,3 +40,29 @@ results/                 # Training outputs (gitignored)
 models/                  # Exported models (gitignored)
 data/                    # Dataset (gitignored)
 ```
+
+## Baseline model (v1)
+
+First implementation: **Patchcore** with Anomalib defaults (`num_neighbors=6`), trained on the 213 normal
+transistor images with no tuning or optimisation.
+
+| Metric | Value |
+|---|---|
+| Image AUROC | 0.996 |
+| Image F1 | 0.962 |
+| Pixel AUROC | 0.973 |
+| Pixel F1 | 0.610 |
+
+97/100 test images classified correctly (1 false positive, 2 false negatives). Full breakdown and charts:
+[docs/baseline_overview.md](docs/baseline_overview.md).
+
+Patchcore subsamples randomly, so re-training gives slightly different numbers. The weights (~234 MB) are
+too large for git; the saved copy lives locally in `models/v1_baseline/` (gitignored).
+
+Reproduce:
+
+```bash
+uv run python scripts/prepare_data.py          # extract + validate data
+uv run python src/anomaly_detection/training.py   # train, test, export, save figures
+uv run python scripts/results_overview.py      # metrics + overview chart
+```
