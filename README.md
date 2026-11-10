@@ -66,3 +66,13 @@ uv run python scripts/prepare_data.py          # extract + validate data
 uv run python src/anomaly_detection/training.py   # train, test, export, save figures
 uv run python scripts/results_overview.py      # metrics + overview chart
 ```
+
+## v1 vs v2 comparison
+
+v2 (384px input, 9 neighbours) was compared against v1 over 3 seeds each. Image-level metrics are unchanged,
+pixel-level metrics are worse (pixel AUROC 0.973 -> 0.922) and training is ~70x slower, so v1 stays the baseline.
+Details: [docs/version_comparison.md](docs/version_comparison.md)
+
+![comparison](docs/version_comparison.png)
+
+Reproduce: `uv run python scripts/compare_versions.py` then `uv run python scripts/comparison_overview.py`.
