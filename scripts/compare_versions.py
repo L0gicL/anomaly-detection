@@ -30,6 +30,8 @@ from anomaly_detection.experiment import Config, run
 CONFIGS = [
     Config(name="v1_baseline", image_size=256, num_neighbors=6),
     Config(name="v2_384px_k9", image_size=384, num_neighbors=9),
+    # v3 = baseline settings, but trained on 2x data (originals + 1 augmented copy each)
+    Config(name="v3_aug2x", image_size=256, num_neighbors=6, data_root="data/MVTecAD_aug"),
 ]
 SEEDS = [0, 1, 2]
 METRICS = ["image_AUROC", "image_F1Score", "pixel_AUROC", "pixel_F1Score"]
@@ -37,7 +39,7 @@ OUT_JSON = ROOT / "results/comparison.json"
 OUT_MD = ROOT / "results/comparison.md"
 OUT_PNG = ROOT / "results/comparison.png"
 
-COLORS = ["#2a78d6", "#eb6834"]  # reference palette slots 1 and 2
+COLORS = ["#2a78d6", "#eb6834", "#1baf7a"]  # reference palette slots 1-3 (blue, orange, aqua)
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e6e5e1", "#fcfcfb"
 
 
@@ -72,17 +74,18 @@ def report() -> None:
         "",
         f"Mean ± std over seeds {SEEDS} on the 100-image transistor test set.",
         "",
-        "| Version | Image size | Neighbours |",
-        "|---|---|---|",
-        *[f"| {n} | {cfg[n].image_size}px | {cfg[n].num_neighbors} |" for n in names],
+        "| Version | Image size | Neighbours | Training data |",
+        "|---|---|---|---|",
+        *[f"| {n} | {cfg[n].image_size}px | {cfg[n].num_neighbors} | {cfg[n].data_root} |"
+          for n in names],
         "",
-        "| Metric | " + " | ".join(names) + " | Change (v2 - v1) |",
-        "|---|" + "---|" * (len(names) + 1),
+        "| Metric | " + " | ".join(names) + " | " + " | ".join(f"{n.split('_')[0]} - v1" for n in names[1:]) + " |",
+        "|---|" + "---|" * (len(names) + len(names) - 1),
     ]
     for key in METRICS + ["fit_s", "test_s"]:
         cells = [f"{stats(n, key)[0]:.4f} ± {stats(n, key)[1]:.4f}" for n in names]
-        delta = stats(names[1], key)[0] - stats(names[0], key)[0]
-        md.append(f"| {key} | " + " | ".join(cells) + f" | {delta:+.4f} |")
+        deltas = [f"{stats(n, key)[0] - stats(names[0], key)[0]:+.4f}" for n in names[1:]]
+        md.append(f"| {key} | " + " | ".join(cells) + " | " + " | ".join(deltas) + " |")
     md += ["", "Per-seed values:", "", "| Version | Seed | " + " | ".join(METRICS) + " |",
            "|---|---|" + "---|" * len(METRICS)]
     for n in names:
@@ -112,7 +115,7 @@ def report() -> None:
         ax.set_ylim(max(0, lo - 0.08), 1.0 if "AUROC" in key else min(1.0, max(r[key] for r in results) + 0.08))
         ax.set_xticks(range(len(names)), [n.split("_")[0] for n in names], color=INK2)
         ax.set_title(key, loc="left", color=INK, fontsize=11)
-    fig.suptitle("Patchcore v1 vs v2 (bars = mean, dots = individual seeds; y-axis truncated)",
+    fig.suptitle("Patchcore versions (bars = mean, dots = individual seeds; y-axis truncated)",
                  x=0.01, ha="left", color=INK, fontsize=12, fontweight="bold")
     fig.tight_layout()
     fig.savefig(OUT_PNG, dpi=130, bbox_inches="tight", facecolor=SURFACE)
@@ -122,7 +125,9 @@ def report() -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--report-only", action="store_true")
+    parser.add_argument("--train-only", action="store_true", help="skip the report at the end")
     args = parser.parse_args()
     if not args.report_only:
         train_all()
-    report()
+    if not args.train_only:
+        report()

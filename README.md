@@ -67,12 +67,26 @@ uv run python src/anomaly_detection/training.py   # train, test, export, save fi
 uv run python scripts/results_overview.py      # metrics + overview chart
 ```
 
-## v1 vs v2 comparison
+## Version comparison (v1, v2, v3)
 
-v2 (384px input, 9 neighbours) was compared against v1 over 3 seeds each. Image-level metrics are unchanged,
-pixel-level metrics are worse (pixel AUROC 0.973 -> 0.922) and training is ~70x slower, so v1 stays the baseline.
-Details: [docs/version_comparison.md](docs/version_comparison.md)
+Each version was trained with 3 seeds and scored on the 100-image test set.
+
+| Version | Setup | Image AUROC | Pixel AUROC | Pixel F1 | Train time |
+|---|---|---|---|---|---|
+| v1 | 256px, k=6 (baseline) | 0.994 | 0.973 | 0.609 | 1 min |
+| v2 | 384px, k=9 | 0.994 | 0.922 | 0.544 | 71 min |
+| v3 | 256px, k=6, 2x augmented data | 0.996 | 0.972 | 0.607 | 3.5 min |
+
+Neither v2 nor v3 clearly beats v1. The neighbour count only changes image scores, not pixel metrics
+(see [docs/neighbor_sweep.md](docs/neighbor_sweep.md)). Details: [docs/version_comparison.md](docs/version_comparison.md)
 
 ![comparison](docs/version_comparison.png)
 
-Reproduce: `uv run python scripts/compare_versions.py` then `uv run python scripts/comparison_overview.py`.
+Reproduce:
+
+```bash
+uv run python scripts/make_augmented_data.py     # builds data/MVTecAD_aug for v3
+uv run python scripts/compare_versions.py        # trains v1-v3, 3 seeds each
+uv run python scripts/neighbor_sweep.py          # neighbour sweep on v3
+uv run python scripts/comparison_overview.py     # overview chart
+```
