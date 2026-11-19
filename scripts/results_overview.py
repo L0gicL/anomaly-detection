@@ -19,7 +19,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-
 from anomalib.data import MVTecAD
 from anomalib.engine import Engine
 from anomalib.models import Patchcore

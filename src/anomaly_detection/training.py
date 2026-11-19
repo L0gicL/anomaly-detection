@@ -6,7 +6,6 @@ import matplotlib
 matplotlib.use("Agg")  # save figures to disk, no GUI window
 import matplotlib.pyplot as plt
 import numpy as np
-
 from anomalib.data import MVTecAD
 from anomalib.deploy import ExportType
 from anomalib.engine import Engine

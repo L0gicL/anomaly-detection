@@ -173,6 +173,19 @@ of PyTorch.
 uv sync
 ```
 
+Without uv, a pinned `requirements.txt` (exported from `uv.lock`) is also provided. Use Python 3.12 and a virtual
+environment; the file already points pip at the PyTorch CUDA 13.0 index:
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then run the scripts below with `python` instead of `uv run python`. `requirements.txt` is generated, so after
+changing dependencies in `pyproject.toml` run `uv lock` and re-export it
+(`uv export --no-hashes --no-dev --no-emit-project --no-annotate`, keeping the header lines).
+
 Place `transistor.tar.xz` (downloaded from MVTec, see [Dataset and license](#dataset-and-license)) in the project
 root, then:
 
@@ -209,6 +222,7 @@ scripts/
   results_overview.py    # v1 metrics, per-category results, confusion matrix
 docs/                    # committed result summaries (tables, charts, raw JSON)
 notebooks/notes.ipynb    # project notes: defect types and ideas for improvement
+pyproject.toml, uv.lock  # dependencies (uv); requirements.txt is a pinned pip export of the same
 data/  results/  models/ # dataset, training outputs, saved models (git-ignored)
 ```
 
